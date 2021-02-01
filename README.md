@@ -33,4 +33,5 @@ Each json file should contain a list of json object of the following structure
   
 * The length of `graph` list should be the number of the edges. Each edge should be represented as a three element tuple `[source, edge_type, destination]`. Where the `source` and `destinations` are indices of corresponding node in `node_features` list. Edge types should be from `0` to `max_edge_types`. 
 
-
+## Note 
+1. In this implementation, we followed Devign's paper. We could **NOT** recreate the result in the original paper though.
