@@ -11,8 +11,8 @@ class DevignModel(nn.Module):
         self.out_dim = output_dim
         self.max_edge_types = max_edge_types
         self.num_timesteps = num_steps
-        self.ggnn = GatedGraphConv(in_feats=input_dim, out_feats=output_dim, n_steps=num_steps,
-                                   n_etypes=max_edge_types)
+        self.ggnn = GatedGraphConv(in_feats=input_dim, out_feats=output_dim,
+                                   n_steps=num_steps, n_etypes=max_edge_types)
         self.conv_l1 = torch.nn.Conv1d(output_dim, output_dim, 3)
         self.maxpool1 = torch.nn.MaxPool1d(3, stride=2)
         self.conv_l2 = torch.nn.Conv1d(output_dim, output_dim, 1)
@@ -58,4 +58,25 @@ class DevignModel(nn.Module):
         before_avg = torch.mul(self.mlp_y(Y_2), self.mlp_z(Z_2))
         avg = before_avg.mean(dim=1)
         result = self.sigmoid(avg).squeeze(dim=-1)
+        return result
+
+
+class GGNNSum(nn.Module):
+    def __init__(self, input_dim, output_dim, max_edge_types, num_steps=8):
+        super(GGNNSum, self).__init__()
+        self.inp_dim = input_dim
+        self.out_dim = output_dim
+        self.max_edge_types = max_edge_types
+        self.num_timesteps = num_steps
+        self.ggnn = GatedGraphConv(in_feats=input_dim, out_feats=output_dim, n_steps=num_steps,
+                                   n_etypes=max_edge_types)
+        self.classifier = nn.Linear(in_features=output_dim, out_features=1)
+        self.sigmoid = nn.Sigmoid()
+
+    def forward(self, batch, cuda=False):
+        graph, features, edge_types = batch.get_network_inputs(cuda=cuda)
+        outputs = self.ggnn(graph, features, edge_types)
+        h_i, _ = batch.de_batchify_graphs(outputs)
+        ggnn_sum = self.classifier(h_i.sum(dim=1))
+        result = self.sigmoid(ggnn_sum).squeeze(dim=-1)
         return result
