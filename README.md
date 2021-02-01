@@ -35,3 +35,6 @@ Each json file should contain a list of json object of the following structure
 
 ## Note 
 1. In this implementation, we followed Devign's paper. We could **NOT** recreate the result in the original paper though.
+
+## Reference
+[1] Zhou, Yaqin, et al. "Devign: Effective vulnerability identification by learning comprehensive program semantics via graph neural networks." arXiv preprint arXiv:1909.03496 (2019).
